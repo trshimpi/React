@@ -129,57 +129,96 @@ const ImageCard = ({ imageUrl, sourceTag }) => {
         }
     };
     
+    // const copyImageToClipboard = async (withTag = false) => {
+    //     try {
+    //         const proxyUrl = 'http://localhost:8080/';
+    //         const response = await fetch(proxyUrl + imageUrl );
+    //         const blob = await response.blob();
+    
+    //         if (withTag) {
+    //             // Load the image from the blob
+    //             const img = document.createElement('img');
+    //             img.src = URL.createObjectURL(blob);
+    
+    //             img.onload = async () => {
+    //                 // Create a canvas to draw the image and the tag
+    //                 const canvas = document.createElement('canvas');
+    //                 const ctx = canvas.getContext('2d');
+    
+    //                 // Set the canvas size to match the image
+    //                 canvas.width = img.naturalWidth;
+    //                 canvas.height = img.naturalHeight;
+    
+    //                 // Draw the image onto the canvas
+    //                 ctx.drawImage(img, 0, 0);
+    
+    //                 // Set the style for the source tag (watermark)
+    //                 ctx.font = '50px Arial';
+    //                 ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';  // White color with slight transparency
+    //                 ctx.textAlign = 'left';
+    //                 ctx.textBaseline = 'bottom';
+    
+    //                 // Position the source tag at the bottom left corner of the image
+    //                 const padding = 10;
+    //                 ctx.fillText(sourceTag, padding, canvas.height - padding);
+    
+    //                 // Convert the canvas to a blob and copy it to clipboard
+    //                 canvas.toBlob(async (taggedBlob) => {
+    //                     await navigator.clipboard.write([
+    //                         new ClipboardItem({
+    //                             [taggedBlob.type]: taggedBlob,
+    //                         }),
+    //                     ]);
+    //                     alert('Image with source tag copied to clipboard!');
+    //                 }, 'image/png');
+    //             };
+    //         } else {
+    //             // Directly copy the original image to clipboard
+    //             await navigator.clipboard.write([
+    //                 new ClipboardItem({
+    //                     [blob.type]: blob,
+    //                 }),
+    //             ]);
+    //             alert('Original image copied to clipboard!');
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to copy image:', error);
+    //         alert('Failed to copy image to clipboard.');
+    //     }
+    // };
+    
     const copyImageToClipboard = async (withTag = false) => {
         try {
-            const response = await fetch(imageUrl);
+            const proxyUrl = 'http://localhost:8080/';
+            const response = await fetch(proxyUrl + imageUrl);
             const blob = await response.blob();
     
-            if (withTag) {
-                // Load the image from the blob
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(blob);
+            // Load the image from the blob
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
     
-                img.onload = async () => {
-                    // Create a canvas to draw the image and the tag
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
+            img.onload = async () => {
+                // Create a canvas to draw the image (and the tag if needed)
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
     
-                    // Set the canvas size to match the image
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                // Set the canvas size to match the image
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
     
-                    // Draw the image onto the canvas
-                    ctx.drawImage(img, 0, 0);
+                // Draw the image onto the canvas
+                ctx.drawImage(img, 0, 0);
     
-                    // Set the style for the source tag (watermark)
-                    ctx.font = '50px Arial';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';  // White color with slight transparency
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'bottom';
-    
-                    // Position the source tag at the bottom left corner of the image
-                    const padding = 10;
-                    ctx.fillText(sourceTag, padding, canvas.height - padding);
-    
-                    // Convert the canvas to a blob and copy it to clipboard
-                    canvas.toBlob(async (taggedBlob) => {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({
-                                [taggedBlob.type]: taggedBlob,
-                            }),
-                        ]);
-                        alert('Image with source tag copied to clipboard!');
-                    }, 'image/png');
-                };
-            } else {
-                // Directly copy the original image to clipboard
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        [blob.type]: blob,
-                    }),
-                ]);
-                alert('Original image copied to clipboard!');
-            }
+                // Convert the canvas to a blob in PNG format and copy it to clipboard
+                canvas.toBlob(async (taggedBlob) => {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            'image/png': taggedBlob,  // Force the type to be 'image/png'
+                        }),
+                    ]);
+                    alert(withTag ? 'Image with source tag copied to clipboard!' : 'Original image copied to clipboard!');
+                }, 'image/png'); // Ensuring the image is PNG
+            };
         } catch (error) {
             console.error('Failed to copy image:', error);
             alert('Failed to copy image to clipboard.');
